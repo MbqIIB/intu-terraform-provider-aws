@@ -135,25 +135,6 @@ resource "aws_s3_bucket" "bucket" {
 	force_destroy = true
 }
 
-resource "aws_iam_role" "test" {
-  name = "test1-me-some-role-cons-for-tf-sc-1"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "servicecatalog.us-west-2.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
 resource "aws_s3_bucket_object" "template" {
   bucket = "${aws_s3_bucket.bucket.id}"
   key = "test_templates_for_terraform_sc_dev.json"
@@ -188,5 +169,11 @@ resource "aws_servicecatalog_portfolio" "test" {
   name = "test-1"
   description = "test-2"
   provider_name = "test-3"
+}
+
+resource "aws_servicecatalog_product_association" "test" {
+  depends_on = ["aws_servicecatalog_product.test", "aws_servicecatalog_portfolio.test"]
+  portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
+  product_id = "${aws_servicecatalog_product.test.id}"
 }
 `
