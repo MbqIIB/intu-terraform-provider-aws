@@ -129,7 +129,7 @@ data "aws_caller_identity" "current" {}
 variable region { default = "us-west-2" }
 
 resource "aws_s3_bucket" "bucket" {
-    bucket = "deving-me-some-tf-sc-assoc-${data.aws_caller_identity.current.account_id}-${var.region}"
+    bucket = "deving-me-some-tf-sc-asoc-${data.aws_caller_identity.current.account_id}-${var.region}"
     region = "${var.region}"
     acl    = "private"
 	force_destroy = true
@@ -172,8 +172,8 @@ resource "aws_servicecatalog_portfolio" "test" {
 }
 
 resource "aws_servicecatalog_product_association" "test" {
-	depends_on = ["aws_servicecatalog_product.test", "aws_servicecatalog_portfolio.test"]
-	portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
-	product_id = "${aws_servicecatalog_product.test.id}"
+  depends_on = ["aws_servicecatalog_product.test", "aws_servicecatalog_portfolio.test"]
+  portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
+  product_id = "${aws_servicecatalog_product.test.id}"
 }
 `
