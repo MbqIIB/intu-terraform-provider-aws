@@ -48,9 +48,9 @@ EOF
 }
 
 resource "aws_s3_bucket" "bucket" {
-    region = "${var.region}"
-    acl    = "private"
-    force_destroy = true
+  region = "${var.region}"
+  acl    = "private"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_object" "template" {

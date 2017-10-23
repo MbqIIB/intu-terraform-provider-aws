@@ -129,10 +129,9 @@ data "aws_caller_identity" "current" {}
 variable region { default = "us-west-2" }
 
 resource "aws_s3_bucket" "bucket" {
-    bucket = "deving-me-some-tf-sc-asoc-${data.aws_caller_identity.current.account_id}-${var.region}"
-    region = "${var.region}"
-    acl    = "private"
-	force_destroy = true
+  region = "${var.region}"
+  acl    = "private"
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_object" "template" {
