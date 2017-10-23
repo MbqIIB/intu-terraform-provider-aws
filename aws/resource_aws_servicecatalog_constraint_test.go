@@ -15,8 +15,8 @@ func TestAccAWSServiceCatalogConstrainBasic(t *testing.T) {
 				Config: testAccCheckAwsServiceCatalogConstraintResourceConfigBasic1,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "description", "test"),
-					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "owner", "1234"),
-					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "parameters", "arn"),
+					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "owner", "658335898421"),
+					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "parameters", "{\"RoleArn\":\"arn:aws:iam::658335898421:role/test1-me-some-sc-cons\"}"),
 					resource.TestCheckResourceAttr("aws_servicecatalog_constraint.test", "type", "LAUNCH"),
 				),
 			},
@@ -29,7 +29,7 @@ data "aws_caller_identity" "current" {}
 variable region { default = "us-west-2" }
 
 resource "aws_iam_role" "test" {
-  name = "test1-me-some-sc"
+  name = "test1-me-some-sc-cons"
 
   assume_role_policy = <<EOF
 {
@@ -38,7 +38,7 @@ resource "aws_iam_role" "test" {
     {
       "Effect": "Allow",
       "Principal": {
-        "AWS": "*"
+        "Service": "servicecatalog.us-west-2.amazonaws.com"
       },
       "Action": "sts:AssumeRole"
     }
@@ -48,7 +48,6 @@ EOF
 }
 
 resource "aws_s3_bucket" "bucket" {
-    bucket = "deving-me-some-tf-sc-${data.aws_caller_identity.current.account_id}-${var.region}"
     region = "${var.region}"
     acl    = "private"
     force_destroy = true
@@ -90,9 +89,15 @@ resource "aws_servicecatalog_product" "test" {
   support_url = "https://www.example.com"
 }
 
+resource "aws_servicecatalog_product_association" "test" {
+  depends_on = ["aws_servicecatalog_product.test", "aws_servicecatalog_portfolio.test"]
+  portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
+  product_id = "${aws_servicecatalog_product.test.id}"
+}
+
 resource "aws_servicecatalog_constraint" "test" {
-  description = "test constraint"
-  parameters = "${aws_iam_role.test.arn}"
+  description = "test"
+  parameters = "{\"RoleArn\":\"${aws_iam_role.test.arn}\"}"
   portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
   product_id = "${aws_servicecatalog_product.test.id}"
   type = "LAUNCH"

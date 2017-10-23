@@ -2,6 +2,7 @@ package aws
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -97,12 +98,22 @@ func resourceAwsServiceCatalogConstraintCreate(d *schema.ResourceData, meta inte
 		input.Type = aws.String(v.(string))
 	}
 
-	resp, err := conn.CreateConstraint(&input)
-	if err != nil {
-		return fmt.Errorf("Creating ServiceCatalog constraint failed: %s", err.Error())
+	for i := 0; i < 10; i++ {
+		resp, err := conn.CreateConstraint(&input)
+		// retry due to iam consistency errors
+		// this needs to be improved to only retry on retriable errors
+		// similiar to principle association
+		if err != nil {
+			if i < 9 {
+				log.Printf("[WARN] Resource not found, retrying.")
+				time.Sleep(3000 * time.Millisecond)
+				continue
+			}
+			return fmt.Errorf("Creating ServiceCatalog constraint failed: %s (%+v) %d)", err.Error(), input, i)
+		}
+		d.SetId(*resp.ConstraintDetail.ConstraintId)
+		break
 	}
-	d.SetId(*resp.ConstraintDetail.ConstraintId)
-
 	return resourceAwsServiceCatalogConstraintRead(d, meta)
 }
 

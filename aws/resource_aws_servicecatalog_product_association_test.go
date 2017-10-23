@@ -129,10 +129,29 @@ data "aws_caller_identity" "current" {}
 variable region { default = "us-west-2" }
 
 resource "aws_s3_bucket" "bucket" {
-    bucket = "deving-me-some-tf-sc-assoc-${data.aws_caller_identity.current.account_id}-${var.region}"
+    bucket = "deving-me-some-tf-sc-asoc-${data.aws_caller_identity.current.account_id}-${var.region}"
     region = "${var.region}"
     acl    = "private"
 	force_destroy = true
+}
+
+resource "aws_iam_role" "test" {
+  name = "test1-me-some-role-cons-for-tf-sc-1"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "servicecatalog.us-west-2.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
 }
 
 resource "aws_s3_bucket_object" "template" {
@@ -169,11 +188,5 @@ resource "aws_servicecatalog_portfolio" "test" {
   name = "test-1"
   description = "test-2"
   provider_name = "test-3"
-}
-
-resource "aws_servicecatalog_product_association" "test" {
-	depends_on = ["aws_servicecatalog_product.test", "aws_servicecatalog_portfolio.test"]
-	portfolio_id = "${aws_servicecatalog_portfolio.test.id}"
-	product_id = "${aws_servicecatalog_product.test.id}"
 }
 `
